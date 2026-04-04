@@ -1,0 +1,10 @@
+<suite name="API Suite">
+    <listeners>
+        <listener class-name="com.qa.reports.ExtentReportListener"/>
+    </listeners>
+    <test name="User API Tests">
+        <classes>
+            <class name="com.qa.tests.UserTests"/>
+        </classes>
+    </test>
+</suite>

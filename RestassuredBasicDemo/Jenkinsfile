@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    tools {
+        // Use the Maven installation you configured in Jenkins Global Tool Configuration
+        maven 'Maven-3.9.14'
+        jdk 'JDK-17'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                bat 'mvn clean test'
+            }
+        }
+
+        stage('Archive Extent Report') {
+            steps {
+                // Adjust path if your report is generated elsewhere
+                archiveArtifacts artifacts: 'extent-report.html', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        always {
+            emailext(
+                subject: "API Test Results - Build #${BUILD_NUMBER}",
+                body: """Hello Team,<br><br>
+                The latest API test run has completed.<br>
+                - Total Tests: ${currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction)?.totalCount}<br>
+                - Passed: ${currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction)?.passCount}<br>
+                - Failed: ${currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction)?.failCount}<br><br>
+                Extent Report: ${BUILD_URL}artifact/extent-report.html<br><br>
+                Regards,<br>CI/CD Pipeline""",
+                to: "latchipatulasai@gmail.com"
+            )
+        }
+    }
+}
